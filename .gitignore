@@ -58,3 +58,6 @@ package-lock.json
 
 #Python
 ./idea
+
+# Stop the credentials being pushed
+database/database_credentials.csv
