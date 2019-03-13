@@ -7,16 +7,18 @@ from flask_marshmallow import Marshmallow
 from database.databaseCredentials import Credentials
 
 app = Flask(__name__)
-
+#Getting credentials from credentials csv file
 credentials = Credentials
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://' + credentials.user_name + ':' + credentials.password + '@' + credentials.host + ':' + credentials.port + '/' + credentials.database_name + ''
+# Linking to external database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://' + credentials.user_name + ':' + credentials.password + '@' + credentials.host + ':' + credentials.port + '/' + credentials.database_name 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+#Initialising the database
 db = SQLAlchemy(app)
-
+#Initialising Marshmallow
 ma = Marshmallow(app)
 
-
+#Setting up database table schema
 class NoiseData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     level = db.Column(db.Float)
@@ -28,6 +30,7 @@ class NoiseData(db.Model):
     noiseType = db.Column(db.String(50))
     isPublic = db.Column(db.BOOLEAN)
 
+    #Constructor
     def __init__(self, level, locationName, timeStamp, longitude, latitude, deviceModel, noiseType, isPublic):
         self.level = level
         self.locationName = locationName
@@ -38,16 +41,19 @@ class NoiseData(db.Model):
         self.noiseType = noiseType
         self.isPublic = isPublic
 
-
+#setting which columns will be shown on data return
 class NoiseDataSchema(ma.Schema):
     class Meta:
         fields = ('level', 'locationName', 'timeStamp', 'longitude', 'latitude', 'deviceModel', 'noiseType')
 
-
+#Schema containing one record being added
 noiseData_schema = NoiseDataSchema(strict=True)
+#Schema containing all data
 noiseDataList_schema = NoiseDataSchema(many=True, strict=True)
 
+#--------------------------------------------------Routing-----------------------------------------------------------#
 
+#Routing to get all public data
 @app.route('/', methods = ['GET'])
 def getNoise():
     all_noise = NoiseData.query.filter(NoiseData.isPublic.is_(True))
