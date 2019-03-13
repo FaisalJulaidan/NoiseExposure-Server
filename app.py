@@ -1,8 +1,10 @@
+# inspired by: https://github.com/bradtraversy/flask_sqlalchemy_rest/blob/master/app.py
+# inspired by: http://zetcode.com/db/sqlalchemy/exprlang/ 
+
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from database.databaseCredentials import Credentials
-import os
 
 app = Flask(__name__)
 
@@ -39,16 +41,21 @@ class NoiseData(db.Model):
 
 class NoiseDataSchema(ma.Schema):
     class Meta:
-        strict = ('level', 'locationName', 'timeStamp', 'longitude', 'latitude', 'deviceModel', 'noiseType')
+        fields = ('level', 'locationName', 'timeStamp', 'longitude', 'latitude', 'deviceModel', 'noiseType')
 
 
 noiseData_schema = NoiseDataSchema(strict=True)
 noiseDataList_schema = NoiseDataSchema(many=True, strict=True)
 
 
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
+@app.route('/', methods = ['GET'])
+def getNoise():
+    all_noise = NoiseData.query.filter(NoiseData.isPublic.is_(True))
+    # result = noiseDataList_schema.dump(all_noise)
+    # print(all_noise[0].locationName)
+    # print(result.data) another way of doing it
+    # return jsonify.
+    return noiseDataList_schema.jsonify(all_noise)
 
 
 if __name__ == '__main__':
