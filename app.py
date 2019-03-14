@@ -54,7 +54,7 @@ noiseDataList_schema = NoiseDataSchema(many=True, strict=True)
 # --------------------------------------------------Routing-----------------------------------------------------------#
 
 # Routing to get all public data
-@app.route('/noise', methods = ['GET'])
+@app.route('/api/noise', methods = ['GET'])
 def getNoise():
     all_noise = NoiseData.query.filter(NoiseData.isPublic.is_(True))
     # result = noiseDataList_schema.dump(all_noise)
@@ -63,7 +63,7 @@ def getNoise():
     # return jsonify(result.data).
     return noiseDataList_schema.jsonify(all_noise)
 
-@app.route('api/')
+@app.route('/')
 def getReact():
     return 'this is where the react project will be'
 
