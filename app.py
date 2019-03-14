@@ -23,7 +23,7 @@ class NoiseData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     level = db.Column(db.Float)
     locationName = db.Column(db.String(50))
-    timeStamp = db.Column(db.TIMESTAMP)
+    timeStamp = db.Column(db.DateTime)
     longitude = db.Column(db.Float)
     latitude = db.Column(db.Float)
     deviceModel = db.Column(db.String(50))
