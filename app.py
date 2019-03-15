@@ -5,6 +5,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from database.databaseCredentials import Credentials
+import Enum
 
 app = Flask(__name__)
 # Getting credentials from credentials csv file
@@ -18,6 +19,11 @@ db = SQLAlchemy(app)
 # Initialising Marshmallow
 ma = Marshmallow(app)
 
+class SeverityEnum(enum.Enum):
+    Normal = 1
+    High = 2
+    Dangerous = 3
+
 # Setting up database table schema
 class NoiseData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -28,10 +34,12 @@ class NoiseData(db.Model):
     latitude = db.Column(db.Float)
     deviceModel = db.Column(db.String(50))
     noiseType = db.Column(db.String(50))
+    severity = db.Column(db.Enum)
     isPublic = db.Column(db.BOOLEAN)
+    
 
     # Constructor
-    def __init__(self, level, locationName, timeStamp, longitude, latitude, deviceModel, noiseType, isPublic):
+    def __init__(self, level, locationName, timeStamp, longitude, latitude, deviceModel, noiseType, severity, isPublic):
         self.level = level
         self.locationName = locationName
         self.timeStamp = timeStamp
@@ -39,12 +47,13 @@ class NoiseData(db.Model):
         self.latitude = latitude
         self.deviceModel = deviceModel
         self.noiseType = noiseType
+        self.severity = severity
         self.isPublic = isPublic
 
 # setting which columns will be shown on data return
 class NoiseDataSchema(ma.Schema):
     class Meta:
-        fields = ('level', 'locationName', 'timeStamp', 'longitude', 'latitude', 'deviceModel', 'noiseType')
+        fields = ('level', 'locationName', 'timeStamp', 'longitude', 'latitude', 'deviceModel', 'noiseType', 'severity')
 
 # Schema containing one record being added
 noiseData_schema = NoiseDataSchema(strict=True)
