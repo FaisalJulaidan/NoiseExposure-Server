@@ -11,7 +11,7 @@ from flask_jwt_extended import JWTManager, jwt_refresh_token_required
 from config import BaseConfig
 import enum
 from utilities.helpers import jsonResponse, Callback
-from services import auth_services, user_services
+from services import auth_services
 
 
 app = Flask(__name__)
@@ -174,20 +174,18 @@ if __name__ == '__main__':
 
     # Create database if does't exist
     if not database_exists(url):
-        print('Create db')
+        print('Create database')
         create_database(url)
+        db.drop_all() # drop tables
+        db.create_all() # recreate tables
 
-    db.drop_all() # drop tables
-    db.create_all() # recreate tables
+        # create test users
+        db.session.add(User(username='test', email='test@test.com', password='123'))
+        db.session.add(User(username='test2', email='test2@test.com', password='123'))
+        db.session.commit()
 
-    # create test users
-    db.session.add(User(username='test', email='test@test.com', password='123'))
-    db.session.add(User(username='test2', email='test2@test.com', password='123'))
-    db.session.commit()
-
-    # insert mocked noise data
-    ddl_sql = open("./database/mock_noise_data.sql").read()
-    db.engine.execute(ddl_sql)
-
+        # insert mocked noise data
+        ddl_sql = open("./database/mock_noise_data.sql").read()
+        db.engine.execute(ddl_sql)
 
     app.run() # run the app
