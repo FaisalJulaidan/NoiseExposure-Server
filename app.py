@@ -13,6 +13,11 @@ import enum
 
 app = Flask(__name__)
 app.config.from_object('config.BaseConfig')
+# Getting credentials from credentials csv file
+# credentials = Credentials
+# Linking to external database
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://' + credentials.user_name + ':' + credentials.password + '@' + credentials.host + ':' + credentials.port + '/' + credentials.database_name
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialising the database
 db = SQLAlchemy(app)
@@ -29,7 +34,7 @@ class SeverityEnum(enum.Enum):
 
 # Setting up database table schema
 class NoiseData(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
     level = db.Column(db.Float)
     locationName = db.Column(db.String(50))
     timeStamp = db.Column(db.DateTime)
@@ -40,7 +45,9 @@ class NoiseData(db.Model):
     severity = db.Column(db.Enum(SeverityEnum))
     isPublic = db.Column(db.BOOLEAN)
 
-
+    # Relationships:
+    userId = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='cascade'), nullable=False)
+    user = db.relationship('User', back_populates='noiseData')
 
 
     # Constructor
@@ -65,14 +72,40 @@ class NoiseDataSchema(ma.Schema):
     class Meta:
         fields = ('level', 'locationName', 'timeStamp', 'longitude', 'latitude', 'deviceModel', 'noiseType', 'severity')
 
-
-
-
 # Schema containing one record being added
 noiseData_schema = NoiseDataSchema(strict=True)
 # Schema containing all data
 noiseDataList_schema = NoiseDataSchema(many=True, strict=True)
 
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
+    username = db.Column(db.String(64), nullable=False)
+    email = db.Column(db.String(64), nullable=False)
+    password = db.Column(PasswordType(
+        schemes=[
+            'pbkdf2_sha512',
+            'md5_crypt'
+        ],
+        deprecated=['md5_crypt']
+    ))
+    createdOn = db.Column(db.DateTime(), nullable=False, default=datetime.now)
+
+    # Relationships:
+    noiseData = db.relationship("NoiseData", uselist=False, back_populates="user",
+                                cascade="all, delete, delete-orphan") # cascade ensure data integrity
+
+    # def __repr__(self):
+    #     return '<User {}>'.format(self.email)
+
+# setting which columns will be shown on data return
+class UserSchema(ma.Schema):
+    class Meta:
+        fields = ('username', 'email', 'createdOn')
+
+# Schema containing one record being added
+user_schema = UserSchema(strict=True)
+# Schema containing all data
+usersList_schema = UserSchema(many=True, strict=True)
 
 
 # --------------------------------------------------Routing-----------------------------------------------------------#
@@ -86,6 +119,12 @@ def getNoise():
     # print(result.data) ####### another way of doing it
     # return jsonify(result.data).
     return noiseDataList_schema.jsonify(all_noise)
+
+# Routing to get all public data
+# @app.route('/api/authenticate', methods=['POST'])
+# def login():
+#
+#     return usersList_schema.jsonify(all_users)
 
 
 @app.route('/')
@@ -103,4 +142,15 @@ if __name__ == '__main__':
 
     db.drop_all() # drop tables
     db.create_all() # recreate tables
+
+    # create test users
+    db.session.add(User(username='test', email='test@test.com', password='123'))
+    db.session.add(User(username='test2', email='test2@test.com', password='123'))
+    db.session.commit()
+
+    # insert mocked noise data
+    ddl_sql = open("./database/mock_noise_data.sql").read()
+    db.engine.execute(ddl_sql)
+
+
     app.run() # run the app
