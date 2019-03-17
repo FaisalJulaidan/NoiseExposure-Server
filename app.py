@@ -123,9 +123,8 @@ def getNoise():
 # Routing to get all public data
 # @app.route('/api/authenticate', methods=['POST'])
 # def login():
-#
 #     return usersList_schema.jsonify(all_users)
-
+#
 
 @app.route('/')
 def getReact():
