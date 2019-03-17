@@ -2,13 +2,13 @@ import os
 from datetime import timedelta
 from database.databaseCredentials import Credentials
 
-credentials = Credentials
+credentials = Credentials # database credentials
 
 class BaseConfig(object):
     APP_ROOT = os.path.dirname(os.path.abspath(__file__))
     JWT_SECRET_KEY = os.urandom(24)
 
-    # JWT tokens expires in
+    # JWT tokens expire in
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=2)
 

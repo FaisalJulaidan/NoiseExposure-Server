@@ -7,22 +7,21 @@ from flask_marshmallow import Marshmallow
 from marshmallow_enum import EnumField
 from datetime import datetime
 from sqlalchemy_utils import create_database, database_exists, PasswordType
+from flask_jwt_extended import JWTManager, jwt_refresh_token_required
 from config import BaseConfig
 import enum
+from utilities.helpers import jsonResponse, Callback
+from services import auth_services, user_services
 
 
 app = Flask(__name__)
-app.config.from_object('config.BaseConfig')
-# Getting credentials from credentials csv file
-# credentials = Credentials
-# Linking to external database
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://' + credentials.user_name + ':' + credentials.password + '@' + credentials.host + ':' + credentials.port + '/' + credentials.database_name
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialising the database
-db = SQLAlchemy(app)
-# Initialising Marshmallow
-ma = Marshmallow(app)
+# setup the application
+app.config.from_object('config.BaseConfig')
+jwt = JWTManager(app)
+db = SQLAlchemy(app) # Initialising the database
+ma = Marshmallow(app) # Initialising Marshmallow
+
 
 
 # Severity Column Enum
@@ -82,25 +81,23 @@ class User(db.Model):
     username = db.Column(db.String(64), nullable=False)
     email = db.Column(db.String(64), nullable=False)
     password = db.Column(PasswordType(
-        schemes=[
-            'pbkdf2_sha512',
-            'md5_crypt'
-        ],
+        schemes=['pbkdf2_sha512', 'md5_crypt'],
         deprecated=['md5_crypt']
     ))
     createdOn = db.Column(db.DateTime(), nullable=False, default=datetime.now)
+    lastAccess = db.Column(db.DateTime(), nullable=True)
 
     # Relationships:
     noiseData = db.relationship("NoiseData", uselist=False, back_populates="user",
                                 cascade="all, delete, delete-orphan") # cascade ensure data integrity
 
-    # def __repr__(self):
-    #     return '<User {}>'.format(self.email)
+    def __repr__(self):
+        return '<User {}>'.format(self.email)
 
 # setting which columns will be shown on data return
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ('username', 'email', 'createdOn')
+        fields = ('username', 'email', 'createdOn', 'lastAccess')
 
 # Schema containing one record being added
 user_schema = UserSchema(strict=True)
@@ -120,11 +117,52 @@ def getNoise():
     # return jsonify(result.data).
     return noiseDataList_schema.jsonify(all_noise)
 
-# Routing to get all public data
-# @app.route('/api/authenticate', methods=['POST'])
-# def login():
-#     return usersList_schema.jsonify(all_users)
-#
+
+# login (get JWT token)
+@app.route('/api/auth', methods=['POST'])
+def authenticate():
+    if request.method == "POST":
+        # get credentials
+        data = request.json
+        # login
+        callback: Callback = auth_services.authenticate(data.get('email', ""), data.get('password', ""))
+        print(callback.Message)
+        print(callback.Data)
+        # return json response
+        if callback.Success:
+            return jsonResponse(True, 200, "Authorised!", callback.Data)
+        else:
+            print(callback.Message)
+            return jsonResponse(False, 401, "Unauthorised!",  callback.Data)
+
+
+# refresh JWT token endpoint
+@app.route('/api/auth/refresh', methods=['POST'])
+@jwt_refresh_token_required
+def refresh():
+    if request.method == "POST":
+        # refresh token
+        callback = auth_services.refreshToken()
+
+        # return json response
+        if callback.Success:
+            return jsonResponse(True, 200, "Authorised!", callback.Data)
+        else:
+            return jsonResponse(False, 401, "Unauthorised!", callback.Data)
+
+
+@app.route('/api/signup', methods=['POST'])
+def signup_process():
+    if request.method == "POST":
+        # create new user
+        callback: Callback = auth_services.signup(request.json)
+
+        # return json response
+        if callback.Success:
+            return jsonResponse(True, 200, callback.Message, callback.Data)
+        else:
+            return jsonResponse(False, 401, callback.Message, callback.Data)
+
 
 @app.route('/')
 def getReact():
