@@ -4,18 +4,20 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-from database.databaseCredentials import Credentials
 from marshmallow_enum import EnumField
+from datetime import datetime
+from sqlalchemy_utils import create_database, database_exists, PasswordType
+from config import BaseConfig
 import enum
 
 
 app = Flask(__name__)
+app.config.from_object('config.BaseConfig')
 # Getting credentials from credentials csv file
-credentials = Credentials
+# credentials = Credentials
 # Linking to external database
-app.config[
-    'SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://' + credentials.user_name + ':' + credentials.password + '@' + credentials.host + ':' + credentials.port + '/' + credentials.database_name
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://' + credentials.user_name + ':' + credentials.password + '@' + credentials.host + ':' + credentials.port + '/' + credentials.database_name
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialising the database
 db = SQLAlchemy(app)
@@ -43,6 +45,11 @@ class NoiseData(db.Model):
     severity = db.Column(db.Enum(SeverityEnum))
     isPublic = db.Column(db.BOOLEAN)
 
+    # Relationships:
+    # userId = db.Column(db.Integer, db.ForeignKey('company.ID', ondelete='cascade'), nullable=False)
+    # noiseData = db.relationship('User', back_populates='noiseData')
+
+
     # Constructor
     def __init__(self, level, locationName, timeStamp, longitude, latitude, deviceModel, noiseType, severity, isPublic):
         self.level = level
@@ -64,6 +71,8 @@ class NoiseDataSchema(ma.Schema):
 
     class Meta:
         fields = ('level', 'locationName', 'timeStamp', 'longitude', 'latitude', 'deviceModel', 'noiseType', 'severity')
+
+
 
 
 # Schema containing one record being added
@@ -91,4 +100,10 @@ def getReact():
 
 
 if __name__ == '__main__':
+    url = BaseConfig.SQLALCHEMY_DATABASE_URI
+    print(database_exists(url))
+    if not database_exists(url):
+        print('Create db tables')
+        create_database(url)
+        db.create_all()
     app.run()

@@ -13,6 +13,7 @@ marshmallow-sqlalchemy = "*"
 pymysql = "*"
 marshmallow-enum = "*"
 flask-jwt-extended = "*"
+sqlalchemy-utils = "*"
 
 [requires]
 python_version = "3"
