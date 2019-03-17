@@ -13,11 +13,6 @@ import enum
 
 app = Flask(__name__)
 app.config.from_object('config.BaseConfig')
-# Getting credentials from credentials csv file
-# credentials = Credentials
-# Linking to external database
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://' + credentials.user_name + ':' + credentials.password + '@' + credentials.host + ':' + credentials.port + '/' + credentials.database_name
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialising the database
 db = SQLAlchemy(app)
@@ -45,9 +40,7 @@ class NoiseData(db.Model):
     severity = db.Column(db.Enum(SeverityEnum))
     isPublic = db.Column(db.BOOLEAN)
 
-    # Relationships:
-    # userId = db.Column(db.Integer, db.ForeignKey('company.ID', ondelete='cascade'), nullable=False)
-    # noiseData = db.relationship('User', back_populates='noiseData')
+
 
 
     # Constructor
@@ -81,6 +74,7 @@ noiseData_schema = NoiseDataSchema(strict=True)
 noiseDataList_schema = NoiseDataSchema(many=True, strict=True)
 
 
+
 # --------------------------------------------------Routing-----------------------------------------------------------#
 
 # Routing to get all public data
@@ -101,9 +95,12 @@ def getReact():
 
 if __name__ == '__main__':
     url = BaseConfig.SQLALCHEMY_DATABASE_URI
-    print(database_exists(url))
+
+    # Create database if does't exist
     if not database_exists(url):
-        print('Create db tables')
+        print('Create db')
         create_database(url)
-        db.create_all()
-    app.run()
+
+    db.drop_all() # drop tables
+    db.create_all() # recreate tables
+    app.run() # run the app
