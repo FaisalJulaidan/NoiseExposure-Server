@@ -2,10 +2,10 @@ from app import db, User
 from utilities.helpers import Callback
 
 
-def create(username, email, password) -> Callback:
+def create(email, password) -> Callback:
     try:
         # Create a new user
-        newUser: User = User(username=username, email=email.lower(), password=password)
+        newUser: User = User(email=email.lower(), password=password)
         db.session.add(newUser)
 
         db.session.commit() # save changes

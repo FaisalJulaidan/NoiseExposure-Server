@@ -24,7 +24,7 @@ def signup(details) -> Callback:
             return Callback(False, 'User already exists.')
 
         # Create a new user with its associated company and owner role
-        user_callback = user_services.create(details['username'], details['email'], details['password'])
+        user_callback = user_services.create(details['email'], details['password'])
         if not user_callback.Success:
             return user_callback
 
@@ -54,7 +54,7 @@ def authenticate(email: str, password_to_check: str) -> Callback:
             return Callback(False, "Record with the current email or password was not found")
 
         # If all the tests are valid then do login process
-        data = {'user': {"email": user.email, "username": user.username}}
+        data = {'user': {"email": user.email}}
 
         # for security, hide them in the token
         tokenData = {'user': {"id": user.id, "email": user.email}}
