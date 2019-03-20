@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from marshmallow_enum import EnumField
 from datetime import datetime
-from sqlalchemy_utils import create_database, database_exists, PasswordType
+from sqlalchemy_utils import create_database, database_exists, PasswordType, drop_database
 from flask_jwt_extended import JWTManager, jwt_refresh_token_required
 from config import BaseConfig
 import enum
@@ -78,7 +78,6 @@ noiseDataList_schema = NoiseDataSchema(many=True, strict=True)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
-    username = db.Column(db.String(64), nullable=False)
     email = db.Column(db.String(64), nullable=False)
     password = db.Column(PasswordType(
         schemes=['pbkdf2_sha512', 'md5_crypt'],
@@ -97,7 +96,7 @@ class User(db.Model):
 # setting which columns will be shown on data return
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ('username', 'email', 'createdOn', 'lastAccess')
+        fields = ('email', 'createdOn', 'lastAccess')
 
 # Schema containing one record being added
 user_schema = UserSchema(strict=True)
@@ -180,8 +179,8 @@ if __name__ == '__main__':
         db.create_all() # recreate tables
 
         # create test users
-        db.session.add(User(username='test', email='test@test.com', password='123'))
-        db.session.add(User(username='test2', email='test2@test.com', password='123'))
+        db.session.add(User(email='test@test.com', password='123'))
+        db.session.add(User(email='test2@test.com', password='123'))
         db.session.commit()
 
         # insert mocked noise data
