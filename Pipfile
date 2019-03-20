@@ -12,6 +12,9 @@ flask-marshmallow = "*"
 marshmallow-sqlalchemy = "*"
 pymysql = "*"
 marshmallow-enum = "*"
+flask-jwt-extended = "*"
+sqlalchemy-utils = "*"
+passlib = "*"
 
 [requires]
 python_version = "3"
