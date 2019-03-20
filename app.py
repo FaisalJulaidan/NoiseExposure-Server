@@ -6,18 +6,22 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from marshmallow_enum import EnumField
 from datetime import datetime
-from sqlalchemy_utils import create_database, database_exists, PasswordType
+from sqlalchemy_utils import create_database, database_exists, PasswordType, drop_database
+from flask_jwt_extended import JWTManager, jwt_refresh_token_required
 from config import BaseConfig
 import enum
+from utilities.helpers import jsonResponse, Callback
+from services import auth_services
 
 
 app = Flask(__name__)
-app.config.from_object('config.BaseConfig')
 
-# Initialising the database
-db = SQLAlchemy(app)
-# Initialising Marshmallow
-ma = Marshmallow(app)
+# setup the application
+app.config.from_object('config.BaseConfig')
+jwt = JWTManager(app)
+db = SQLAlchemy(app) # Initialising the database
+ma = Marshmallow(app) # Initialising Marshmallow
+
 
 
 # Severity Column Enum
@@ -29,7 +33,7 @@ class SeverityEnum(enum.Enum):
 
 # Setting up database table schema
 class NoiseData(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
     level = db.Column(db.Float)
     locationName = db.Column(db.String(50))
     timeStamp = db.Column(db.DateTime)
@@ -40,7 +44,9 @@ class NoiseData(db.Model):
     severity = db.Column(db.Enum(SeverityEnum))
     isPublic = db.Column(db.BOOLEAN)
 
-
+    # Relationships:
+    userId = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='cascade'), nullable=False)
+    user = db.relationship('User', back_populates='noiseData')
 
 
     # Constructor
@@ -65,14 +71,37 @@ class NoiseDataSchema(ma.Schema):
     class Meta:
         fields = ('level', 'locationName', 'timeStamp', 'longitude', 'latitude', 'deviceModel', 'noiseType', 'severity')
 
-
-
-
 # Schema containing one record being added
 noiseData_schema = NoiseDataSchema(strict=True)
 # Schema containing all data
 noiseDataList_schema = NoiseDataSchema(many=True, strict=True)
 
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
+    email = db.Column(db.String(64), nullable=False)
+    password = db.Column(PasswordType(
+        schemes=['pbkdf2_sha512', 'md5_crypt'],
+        deprecated=['md5_crypt']
+    ))
+    createdOn = db.Column(db.DateTime(), nullable=False, default=datetime.now)
+    lastAccess = db.Column(db.DateTime(), nullable=True)
+
+    # Relationships:
+    noiseData = db.relationship("NoiseData", uselist=False, back_populates="user",
+                                cascade="all, delete, delete-orphan") # cascade ensure data integrity
+
+    def __repr__(self):
+        return '<User {}>'.format(self.email)
+
+# setting which columns will be shown on data return
+class UserSchema(ma.Schema):
+    class Meta:
+        fields = ('email', 'createdOn', 'lastAccess')
+
+# Schema containing one record being added
+user_schema = UserSchema(strict=True)
+# Schema containing all data
+usersList_schema = UserSchema(many=True, strict=True)
 
 
 # --------------------------------------------------Routing-----------------------------------------------------------#
@@ -88,6 +117,52 @@ def getNoise():
     return noiseDataList_schema.jsonify(all_noise)
 
 
+# login (get JWT token)
+@app.route('/api/auth', methods=['POST'])
+def authenticate():
+    if request.method == "POST":
+        # get credentials
+        data = request.json
+        # login
+        callback: Callback = auth_services.authenticate(data.get('email', ""), data.get('password', ""))
+        print(callback.Message)
+        print(callback.Data)
+        # return json response
+        if callback.Success:
+            return jsonResponse(True, 200, "Authorised!", callback.Data)
+        else:
+            print(callback.Message)
+            return jsonResponse(False, 401, "Unauthorised!",  callback.Data)
+
+
+# refresh JWT token endpoint
+@app.route('/api/auth/refresh', methods=['POST'])
+@jwt_refresh_token_required
+def refresh():
+    if request.method == "POST":
+        # refresh token
+        callback = auth_services.refreshToken()
+
+        # return json response
+        if callback.Success:
+            return jsonResponse(True, 200, "Authorised!", callback.Data)
+        else:
+            return jsonResponse(False, 401, "Unauthorised!", callback.Data)
+
+
+@app.route('/api/signup', methods=['POST'])
+def signup_process():
+    if request.method == "POST":
+        # create new user
+        callback: Callback = auth_services.signup(request.json)
+
+        # return json response
+        if callback.Success:
+            return jsonResponse(True, 200, callback.Message, callback.Data)
+        else:
+            return jsonResponse(False, 401, callback.Message, callback.Data)
+
+
 @app.route('/')
 def getReact():
     return 'this is where the react project will be'
@@ -98,9 +173,18 @@ if __name__ == '__main__':
 
     # Create database if does't exist
     if not database_exists(url):
-        print('Create db')
+        print('Create database')
         create_database(url)
+        db.drop_all() # drop tables
+        db.create_all() # recreate tables
 
-    db.drop_all() # drop tables
-    db.create_all() # recreate tables
+        # create test users
+        db.session.add(User(email='test@test.com', password='123'))
+        db.session.add(User(email='test2@test.com', password='123'))
+        db.session.commit()
+
+        # insert mocked noise data
+        ddl_sql = open("./database/mock_noise_data.sql").read()
+        db.engine.execute(ddl_sql)
+
     app.run() # run the app
