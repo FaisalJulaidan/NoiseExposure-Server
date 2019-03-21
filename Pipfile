@@ -7,6 +7,14 @@ verify_ssl = true
 
 [packages]
 flask = "*"
+flask-sqlalchemy = "*"
+flask-marshmallow = "*"
+marshmallow-sqlalchemy = "*"
+pymysql = "*"
+marshmallow-enum = "*"
+flask-jwt-extended = "*"
+sqlalchemy-utils = "*"
+passlib = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3"
