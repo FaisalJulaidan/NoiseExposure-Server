@@ -84,8 +84,7 @@ def refreshToken() -> Callback:
         # get logged in user from the submitted refresh token
         current_user = get_jwt_identity()
         # generate a new access token
-        data = {'token': create_access_token(identity=current_user),
-                'expiresIn': datetime.now() + BaseConfig.JWT_ACCESS_TOKEN_EXPIRES}
+        data = {'token': create_access_token(identity=current_user)}
 
         print(data)
         return Callback(True, "Authorised!", data)
