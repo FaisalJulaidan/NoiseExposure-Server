@@ -41,6 +41,7 @@ class NoiseData(db.Model):
     latitude = db.Column(db.Float)
     deviceModel = db.Column(db.String(50))
     noiseType = db.Column(db.String(50))
+    addDetails = db.Column(db.String(200))
     severity = db.Column(db.Enum(SeverityEnum))
     isPublic = db.Column(db.BOOLEAN)
 
@@ -49,7 +50,7 @@ class NoiseData(db.Model):
     user = db.relationship('User', back_populates='noiseData')
 
     # Constructor
-    def __init__(self, level, locationName, timeStamp, longitude, latitude, deviceModel, noiseType, severity, isPublic):
+    def __init__(self, level, locationName, timeStamp, longitude, latitude, deviceModel, noiseType, addDetails, severity, isPublic):
         self.level = level
         self.locationName = locationName
         self.timeStamp = timeStamp
@@ -57,6 +58,7 @@ class NoiseData(db.Model):
         self.latitude = latitude
         self.deviceModel = deviceModel
         self.noiseType = noiseType
+        self.addDetails = addDetails
         self.severity = severity
         self.isPublic = isPublic
 
@@ -68,7 +70,7 @@ class NoiseDataSchema(ma.Schema):
     severity = EnumField(SeverityEnum, by_value=False)
 
     class Meta:
-        fields = ('level', 'locationName', 'timeStamp', 'longitude', 'latitude', 'deviceModel', 'noiseType', 'severity')
+        fields = ('level', 'locationName', 'timeStamp', 'longitude', 'latitude', 'deviceModel', 'noiseType', 'addDetails', 'severity')
 
 
 # Schema containing one record being added
@@ -193,7 +195,7 @@ def store_data_in_database():
             # Pass data to SQLAlchemy noise object
             noiseDataObj = NoiseData(noiseItem['level'], noiseItem['locationName'], noiseItem['timestamp'],
                                      noiseItem['longitude'], noiseItem['latitude'], noiseItem['deviceModel'],
-                                     noiseItem['type'], noiseItem['severity'], noiseItem['isPublic'])
+                                     noiseItem['type'], noiseItem['details'], noiseItem['severity'], noiseItem['isPublic'])
             noiseDataObj.userId = current_user['id']
             db.session.add(noiseDataObj)
         # Commit all items to database
