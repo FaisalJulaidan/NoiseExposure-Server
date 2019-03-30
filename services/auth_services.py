@@ -12,7 +12,6 @@ def my_expired_token_callback(error):
 
 
 def signup(details) -> Callback:
-
     try:
         # Validate Email
         if not isValidEmail(details['email']):
@@ -59,6 +58,8 @@ def authenticate(email: str, password_to_check: str) -> Callback:
         # for security, hide them in the token
         tokenData = {'user': {"id": user.id, "email": user.email}}
 
+        print(tokenData)
+
         # create the JWT token
         access_token = create_access_token(identity=tokenData)
         refresh_token = create_refresh_token(identity=tokenData)
@@ -83,8 +84,9 @@ def refreshToken() -> Callback:
         # get logged in user from the submitted refresh token
         current_user = get_jwt_identity()
         # generate a new access token
-        data = {'token': create_access_token(identity=current_user),
-                'expiresIn': datetime.now() + BaseConfig.JWT_ACCESS_TOKEN_EXPIRES}
+        data = {'token': create_access_token(identity=current_user)}
+
+        print(data)
         return Callback(True, "Authorised!", data)
 
     except Exception as e:
