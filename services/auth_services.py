@@ -54,7 +54,7 @@ def authenticate(email: str, password_to_check: str) -> Callback:
             return Callback(False, "Record with the current email or password was not found")
 
         # If all the tests are valid then do login process
-        data = {'user': {"email": user.email}}
+        data = {'user': {"id": user.id, "email": user.email}}
 
         # for security, hide them in the token
         tokenData = {'user': {"id": user.id, "email": user.email}}
