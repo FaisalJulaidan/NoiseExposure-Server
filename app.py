@@ -72,7 +72,7 @@ class NoiseDataSchema(ma.Schema):
     severity = EnumField(SeverityEnum, by_value=False)
 
     class Meta:
-        fields = ('userId', 'level', 'locationName', 'timeStamp', 'longitude', 'latitude', 'deviceModel', 'noiseType', 'addDetails', 'severity')
+        fields = ('userId', 'level', 'locationName', 'timeStamp', 'longitude', 'latitude', 'deviceModel', 'noiseType', 'severity', 'addDetails')
 
 
 # Schema containing one record being added
