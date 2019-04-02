@@ -75,5 +75,5 @@ The kind of responses you might recieve are
 
 
 ## Contributors
-Faisal, Ieuan, Joey, and Matthew
+Faisal, Ieuan, Joey, and Matthew 🎉
 
