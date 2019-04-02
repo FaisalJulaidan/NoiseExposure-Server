@@ -1,4 +1,4 @@
-###### Note: this README file is dedicated for the Web Application side of the project for further details about the other sides of the project i.e. Mobile Application, and Server Side, please check their repositories. You will need to install/setup all the three repositories for the project to work properly (e.g. retrive data from the database, login, etc.)
+###### Note: this README file is dedicated for the Server side of the project for further details about the other sides of the project i.e. Mobile Application, and Web Application, please check their repositories. You will need to install/setup all the three repositories for the project to work properly (e.g. retrive data from the database, login, etc.)
 
 ## Motivation
 
