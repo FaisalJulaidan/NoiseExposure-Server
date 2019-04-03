@@ -10,6 +10,8 @@ from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow_enum import EnumField
 from sqlalchemy_utils import create_database, database_exists, PasswordType
+from sqlalchemy.sql import desc
+
 
 from config import BaseConfig
 from services import auth_services
@@ -72,7 +74,7 @@ class NoiseDataSchema(ma.Schema):
     severity = EnumField(SeverityEnum, by_value=False)
 
     class Meta:
-        fields = ('userId', 'level', 'locationName', 'timeStamp', 'longitude', 'latitude', 'deviceModel', 'noiseType', 'addDetails' 'severity', 'isPublic')
+        fields = ('userId', 'level', 'locationName', 'timeStamp', 'longitude', 'latitude', 'deviceModel', 'noiseType', 'addDetails', 'severity', 'isPublic')
 
 
 # Schema containing one record being added
@@ -116,7 +118,7 @@ usersList_schema = UserSchema(many=True, strict=True)
 # Routing to get all public data
 @app.route('/api/noise', methods=['GET'])
 def get_noise():
-    all_noise = NoiseData.query.filter(NoiseData.isPublic.is_(True))
+    all_noise = NoiseData.query.filter(NoiseData.isPublic.is_(True)).order_by(desc(NoiseData.timeStamp))
     # result = noiseDataList_schema.dump(all_noise)
     # print(all_noise[0].locationName)
     # print(result.data) ####### another way of doing it
