@@ -6,7 +6,8 @@ credentials = Credentials # database credentials
 
 class BaseConfig(object):
     APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-    JWT_SECRET_KEY = os.urandom(24)
+    JWT_SECRET_KEY = b'C\xae\x0c_\xbaF\x0f\xfdQ\xc8+65\xbc9\x90\xe6K\xae\xbd\x19\r\x80\xb4'
+
 
     # JWT tokens expire in
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
