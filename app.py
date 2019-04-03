@@ -72,7 +72,7 @@ class NoiseDataSchema(ma.Schema):
     severity = EnumField(SeverityEnum, by_value=False)
 
     class Meta:
-        fields = ('userId', 'level', 'locationName', 'timeStamp', 'longitude', 'latitude', 'deviceModel', 'noiseType', 'severity', 'addDetails')
+        fields = ('userId', 'level', 'locationName', 'timeStamp', 'longitude', 'latitude', 'deviceModel', 'noiseType', 'addDetails' 'severity', 'isPublic')
 
 
 # Schema containing one record being added
@@ -225,5 +225,5 @@ if __name__ == '__main__':
         ddl_sql = open("./database/mock_noise_data.sql").read()
         db.engine.execute(ddl_sql)
 
-    # app.run(host='10.247.39.123', port=5000)  # run the app on specific ip address.
+    # app.run(host='192.168.43.20', port=5000)  # run the app on specific ip address.
     app.run()  # run the app on localhost
