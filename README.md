@@ -1,6 +1,6 @@
 ###### Note: this README file is dedicated for the Server side of the project for further details about the other sides of the project i.e. Mobile Application, and Web Application, please check their repositories. You will need to install/setup all the three repositories for the project to work properly (e.g. retrive data from the database, login, etc.)  
 
-###### Note: Make sure that the two sides, Mobile and Web Application, have the same IP address of the server. For furter deatils check the Project Installation section in every side's README file
+###### Note: Make sure that the two sides, Mobile and Web Applications, have the same IP address of the Flask server. For furter deatils check the Project Installation section in every side's README file
 
 ## Motivation
 
