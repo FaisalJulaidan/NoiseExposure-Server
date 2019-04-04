@@ -71,7 +71,7 @@ pipenv run python app.py
 The database has already been setup and hosted on
 https://www.freemysqlhosting.net
 
-In order to connect to your MySQL database, please modify the /database/database_credentials.csv to your database detials following the following format
+In order to connect to your MySQL database, please modify the /database/database_credentials.csv to your database details following the following format
 
 
 ```
