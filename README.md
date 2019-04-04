@@ -54,12 +54,18 @@ pip install --user --upgrade pipenv
 pipenv install
 ```
 
+##### 4.Change IP adress on line 230 in app.py to your device's IP adress
+```bash
+app.run(host='Your IP Adress', port=5000) # run the app on specific ip address.
+# app.run(host='192.168.43.20', port=5000)
+```
+
 ##### 4. Run Python Flask Server
 ```
 pipenv run python app.py
 ```
 
-This can be seen now at [http://127.0.0.1:5000/](http://127.0.0.1:5000/)
+
 
 
 
