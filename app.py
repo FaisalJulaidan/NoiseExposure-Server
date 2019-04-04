@@ -227,5 +227,5 @@ if __name__ == '__main__':
         ddl_sql = open("./database/mock_noise_data.sql").read()
         db.engine.execute(ddl_sql)
 
-    # app.run(host='192.168.43.20', port=5000)  # run the app on specific ip address.
-    app.run()  # run the app on localhost
+    app.run(host='192.168.43.20', port=5000)  # run the app on specific ip address.
+    # app.run()  # run the app on localhost
