@@ -71,12 +71,11 @@ pipenv run python app.py
 The database has already been setup and hosted on
 https://www.freemysqlhosting.net
 
-In order to connect to your MySQL database, please go to config.py on line 16 and change the credentials of the database to yours
+In order to connect to your MySQL database, please modify the /database/database_credentials.csv to your database detials following the following format
 
 
 ```
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://' + credentials.user_name + ':' + credentials.password + '@' + credentials.host + ':' + credentials.port + '/' + credentials.database_name
-
+username,password,host,port,database_name
 ```
 
 
