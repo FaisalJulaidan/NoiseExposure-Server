@@ -62,4 +62,4 @@ package-lock.json
 Pipfile.lock
 
 # Stop the credentials being pushed
-database/database_credentials.csv
+# database/database_credentials.csv
