@@ -54,7 +54,7 @@ pip install --user --upgrade pipenv
 pipenv install
 ```
 
-##### 4.Change IP adress on line 230 in app.py to your device's IP adress
+##### 4. Change IP adress on line 230 in app.py to your device's IP address
 ```bash
 app.run(host='Your IP Adress', port=5000) # run the app on specific ip address.
 # app.run(host='192.168.43.20', port=5000)
@@ -65,6 +65,19 @@ app.run(host='Your IP Adress', port=5000) # run the app on specific ip address.
 pipenv run python app.py
 ```
 
+
+## MySQL Database Setup
+
+The database has already been setup and hosted on
+https://www.freemysqlhosting.net
+
+In order to connect to your MySQL database, please go to config.py on line 16 and change the credentials of the database to your
+
+
+```
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://' + credentials.user_name + ':' + credentials.password + '@' + credentials.host + ':' + credentials.port + '/' + credentials.database_name
+
+```
 
 
 
